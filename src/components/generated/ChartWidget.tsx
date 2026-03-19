@@ -196,24 +196,24 @@ export function ChartWidget({ title, chartType, labels, datasets, description }:
     <div
       className="rounded-2xl overflow-hidden w-full"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
         maxWidth: "520px",
       }}
     >
       <div
         className="flex items-center justify-between px-5 py-4"
-        style={{ borderBottom: "1px solid hsl(var(--border))" }}
+        style={{ borderBottom: "1px solid var(--border-base)" }}
       >
         <div>
           <h3
             className="text-base font-semibold"
-            style={{ fontFamily: "var(--font-display)", color: "hsl(var(--ink))" }}
+            style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-primary)" }}
           >
             {title}
           </h3>
           {description && (
-            <p className="text-xs mt-0.5" style={{ color: "hsl(var(--ink-muted))" }}>
+            <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
               {description}
             </p>
           )}
@@ -225,8 +225,8 @@ export function ChartWidget({ title, chartType, labels, datasets, description }:
               onClick={() => setActiveType(t)}
               className="px-2.5 py-1 rounded-lg text-xs font-medium capitalize transition-all"
               style={{
-                background: activeType === t ? "hsl(var(--brand-subtle))" : "transparent",
-                color: activeType === t ? "hsl(var(--brand))" : "hsl(var(--ink-faint))",
+                background: activeType === t ? "var(--accent-subtle)" : "transparent",
+                color: activeType === t ? "var(--accent-1)" : "var(--text-muted)",
               }}
             >
               {t}
@@ -252,7 +252,7 @@ export function ChartWidget({ title, chartType, labels, datasets, description }:
                 className="w-3 h-3 rounded-sm"
                 style={{ background: ds.color ?? COLORS[i % COLORS.length] }}
               />
-              <span className="text-xs" style={{ color: "hsl(var(--ink-muted))" }}>
+              <span className="text-xs" style={{ color: "var(--text-secondary)" }}>
                 {ds.label}
               </span>
             </div>

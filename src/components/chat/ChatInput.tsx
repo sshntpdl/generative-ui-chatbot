@@ -1,130 +1,84 @@
 "use client";
 
-import { useState, useRef, useCallback, KeyboardEvent } from "react";
+import { useState, useRef, KeyboardEvent } from "react";
 import { Send, Square, Mic } from "lucide-react";
 
-interface ChatInputProps {
-  onSend: (message: string) => void;
-  onStop: () => void;
-  isLoading: boolean;
-  placeholder?: string;
-}
+interface Props { onSend: (text: string) => void; onStop: () => void; isLoading: boolean }
 
-export function ChatInput({
-  onSend,
-  onStop,
-  isLoading,
-  placeholder = "Describe a UI to generate… (e.g. 'Create a todo list with deadlines')",
-}: ChatInputProps) {
+export function ChatInput({ onSend, onStop, isLoading }: Props) {
   const [value, setValue] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const ref = useRef<HTMLTextAreaElement>(null);
 
-  const handleSend = useCallback(() => {
-    const trimmed = value.trim();
-    if (!trimmed || isLoading) return;
-    onSend(trimmed);
+  const send = () => {
+    if (!value.trim() || isLoading) return;
+    onSend(value.trim());
     setValue("");
-    if (textareaRef.current) {
-      textareaRef.current.style.height = "auto";
-    }
-  }, [value, isLoading, onSend]);
-
-  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (ref.current) ref.current.style.height = "auto";
   };
 
-  const handleInput = () => {
-    const el = textareaRef.current;
-    if (!el) return;
-    el.style.height = "auto";
-    el.style.height = Math.min(el.scrollHeight, 200) + "px";
+  const onKey = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
   };
 
-  const canSend = value.trim().length > 0 && !isLoading;
+  const autoResize = () => {
+    if (!ref.current) return;
+    ref.current.style.height = "auto";
+    ref.current.style.height = `${Math.min(ref.current.scrollHeight, 180)}px`;
+  };
 
   return (
     <div
-      className="relative flex items-end gap-3 rounded-2xl p-3"
+      className="flex items-end gap-2 p-2 rounded-2xl transition-all"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
-        transition: "box-shadow 0.2s, border-color 0.2s",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
       }}
-      onFocusCapture={(e) => {
-        const el = e.currentTarget as HTMLDivElement;
-        el.style.borderColor = "hsl(var(--brand-dim))";
-        el.style.boxShadow = "0 0 0 3px hsl(var(--brand-subtle))";
-      }}
-      onBlurCapture={(e) => {
-        const el = e.currentTarget as HTMLDivElement;
-        el.style.borderColor = "hsl(var(--border))";
-        el.style.boxShadow = "none";
-      }}
+      onFocusCapture={e => (e.currentTarget as HTMLDivElement).style.borderColor = "var(--accent-1)"}
+      onBlurCapture={e  => (e.currentTarget as HTMLDivElement).style.borderColor = "var(--border-base)"}
     >
       <textarea
-        ref={textareaRef}
+        ref={ref}
         value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onInput={handleInput}
-        placeholder={placeholder}
+        onChange={e => { setValue(e.target.value); autoResize(); }}
+        onKeyDown={onKey}
+        placeholder="Ask anything — I'll build the UI for you…"
         rows={1}
-        disabled={isLoading}
-        className="flex-1 bg-transparent resize-none outline-none text-sm leading-relaxed"
+        className="flex-1 resize-none bg-transparent outline-none text-sm leading-relaxed px-2 py-1.5"
         style={{
-          color: "hsl(var(--ink))",
-          fontFamily: "var(--font-body)",
-          maxHeight: "200px",
+          color: "var(--text-primary)",
+          fontFamily: "'Inter', sans-serif",
           minHeight: "24px",
-          caretColor: "hsl(var(--brand))",
+          maxHeight: "180px",
+          caretColor: "var(--accent-1)",
         }}
       />
 
-      <div className="flex items-center gap-1.5 shrink-0">
+      <div className="flex items-center gap-1 pb-0.5 flex-shrink-0">
         <button
-          className="p-1.5 rounded-lg opacity-40 transition-opacity"
-          style={{ color: "hsl(var(--ink-muted))" }}
+          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all opacity-40 hover:opacity-60"
+          style={{ color: "var(--text-muted)" }}
           title="Voice input (coming soon)"
           disabled
         >
-          <Mic className="w-4 h-4" />
+          <Mic className="w-3.5 h-3.5" />
         </button>
 
-        {isLoading ? (
-          <button
-            onClick={onStop}
-            className="p-2 rounded-xl transition-all hover:scale-105 flex items-center justify-center"
-            style={{
-              background: "rgba(248, 113, 113, 0.15)",
-              border: "1px solid rgba(248, 113, 113, 0.3)",
-              color: "#f87171",
-            }}
-            title="Stop generation"
-          >
-            <Square className="w-4 h-4 fill-current" />
-          </button>
-        ) : (
-          <button
-            onClick={handleSend}
-            disabled={!canSend}
-            className="p-2 rounded-xl transition-all"
-            style={{
-              background: canSend
-                ? "linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(var(--accent)) 100%)"
-                : "hsl(var(--surface))",
-              border: canSend ? "1px solid transparent" : "1px solid hsl(var(--border))",
-              color: canSend ? "white" : "hsl(var(--ink-faint))",
-              opacity: canSend ? 1 : 0.5,
-              cursor: canSend ? "pointer" : "not-allowed",
-            }}
-            title="Send message (Enter)"
-          >
-            <Send className="w-4 h-4" />
-          </button>
-        )}
+        <button
+          onClick={isLoading ? onStop : send}
+          disabled={!isLoading && !value.trim()}
+          className="w-8 h-8 rounded-xl flex items-center justify-center transition-all hover:scale-105 disabled:opacity-40 disabled:hover:scale-100"
+          style={{
+            background: isLoading
+              ? "rgba(248,113,113,0.15)"
+              : value.trim()
+              ? "var(--accent-1)"
+              : "var(--bg-hover)",
+            border: isLoading ? "1px solid rgba(248,113,113,0.5)" : "none",
+            color: isLoading ? "var(--danger)" : "#fff",
+          }}
+        >
+          {isLoading ? <Square className="w-3 h-3" fill="currentColor" /> : <Send className="w-3.5 h-3.5" />}
+        </button>
       </div>
     </div>
   );

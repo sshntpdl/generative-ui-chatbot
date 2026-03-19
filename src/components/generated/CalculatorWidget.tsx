@@ -82,8 +82,8 @@ export function CalculatorWidget({ expression: initExpr = "", result: initResult
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
         width: "280px",
       }}
     >
@@ -92,7 +92,7 @@ export function CalculatorWidget({ expression: initExpr = "", result: initResult
         {expression && (
           <div
             className="text-right text-sm mb-1"
-            style={{ color: "hsl(var(--ink-faint))", fontFamily: "var(--font-mono)" }}
+            style={{ color: "var(--text-muted)", fontFamily: "'Geist Mono', monospace" }}
           >
             {expression}
           </div>
@@ -100,8 +100,8 @@ export function CalculatorWidget({ expression: initExpr = "", result: initResult
         <div
           className="text-right text-4xl font-bold truncate"
           style={{
-            fontFamily: "var(--font-display)",
-            color: justEvaluated ? "hsl(var(--brand))" : "hsl(var(--ink))",
+            fontFamily: "'Poppins', sans-serif",
+            color: justEvaluated ? "var(--accent-1)" : "var(--text-primary)",
           }}
         >
           {display}
@@ -118,21 +118,21 @@ export function CalculatorWidget({ expression: initExpr = "", result: initResult
             style={{
               background: isOp(btn)
                 ? btn === "="
-                  ? "linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(var(--accent)) 100%)"
-                  : "hsl(var(--brand-subtle))"
+                  ? "linear-gradient(135deg, var(--accent-1) 0%, var(--info) 100%)"
+                  : "var(--accent-subtle)"
                 : isFn(btn)
                 ? "rgba(255,255,255,0.08)"
                 : "rgba(255,255,255,0.05)",
               color: isOp(btn)
                 ? btn === "="
                   ? "white"
-                  : "hsl(var(--brand))"
+                  : "var(--accent-1)"
                 : isFn(btn)
-                ? "hsl(var(--ink-muted))"
-                : "hsl(var(--ink))",
-              border: "1px solid hsl(var(--border))",
+                ? "var(--text-secondary)"
+                : "var(--text-primary)",
+              border: "1px solid var(--border-base)",
               gridColumn: btn === "0" ? "span 2" : "span 1",
-              fontFamily: "var(--font-mono)",
+              fontFamily: "'Geist Mono', monospace",
             }}
           >
             {btn}
@@ -144,20 +144,20 @@ export function CalculatorWidget({ expression: initExpr = "", result: initResult
       {history.length > 0 && (
         <div
           className="px-4 py-3 max-h-32 overflow-y-auto"
-          style={{ borderTop: "1px solid hsl(var(--border))" }}
+          style={{ borderTop: "1px solid var(--border-base)" }}
         >
           <p
             className="text-xs mb-2"
-            style={{ color: "hsl(var(--ink-faint))", fontFamily: "var(--font-mono)" }}
+            style={{ color: "var(--text-muted)", fontFamily: "'Geist Mono', monospace" }}
           >
             HISTORY
           </p>
           {history.map((h, i) => (
             <div key={i} className="flex justify-between items-center py-0.5">
-              <span className="text-xs" style={{ color: "hsl(var(--ink-faint))", fontFamily: "var(--font-mono)" }}>
+              <span className="text-xs" style={{ color: "var(--text-muted)", fontFamily: "'Geist Mono', monospace" }}>
                 {h.expression}
               </span>
-              <span className="text-xs font-medium" style={{ color: "hsl(var(--ink))", fontFamily: "var(--font-mono)" }}>
+              <span className="text-xs font-medium" style={{ color: "var(--text-primary)", fontFamily: "'Geist Mono', monospace" }}>
                 = {h.result}
               </span>
             </div>

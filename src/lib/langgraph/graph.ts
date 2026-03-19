@@ -1,360 +1,176 @@
 import { ChatGroq } from "@langchain/groq";
-import { HumanMessage, SystemMessage, AIMessage } from "@langchain/core/messages";
+import { HumanMessage, SystemMessage } from "@langchain/core/messages";
 import { z } from "zod";
-import { allTools, toolsByName } from "@/lib/langchain/tools";
+import { toolsByName } from "@/lib/langchain/tools";
 import type { GeneratedUIType, GraphState } from "@/types";
 
-// ─── Intent Classification Schema ─────────────────────────────────────────────
-
 const IntentSchema = z.object({
-  uiType: z.enum([
-    "todo-list",
-    "weather-widget",
-    "calculator",
-    "calendar",
-    "data-table",
-    "chart",
-    "kanban-board",
-    "timer",
-    "text",
-  ]),
+  uiType: z.enum(["todo-list","weather-widget","calculator","calendar","data-table","chart","kanban-board","timer","product-grid","product-detail","cart","order-tracking","text"]),
   confidence: z.number().min(0).max(1),
   requiredTools: z.array(z.string()),
   reasoning: z.string(),
 });
-
 type Intent = z.infer<typeof IntentSchema>;
-
-// ─── Groq Client ──────────────────────────────────────────────────────────────
 
 function getGroqClient() {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY is not set");
-  return new ChatGroq({
-    apiKey,
-    model: "llama-3.3-70b-versatile",   // replaces decommissioned llama-3.1-70b-versatile
-    temperature: 0.1,
-  });
+  return new ChatGroq({ apiKey, model: "llama-3.3-70b-versatile", temperature: 0.1 });
 }
-
 function getGroqClientFast() {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) throw new Error("GROQ_API_KEY is not set");
-  return new ChatGroq({
-    apiKey,
-    model: "llama-3.1-8b-instant",      // still active — no change needed
-    temperature: 0.1,
-  });
+  return new ChatGroq({ apiKey, model: "llama-3.1-8b-instant", temperature: 0.1 });
 }
 
-// ─── Node: Intent Detection ───────────────────────────────────────────────────
-
-export async function detectIntentNode(
-  state: GraphState
-): Promise<Partial<GraphState>> {
+export async function detectIntentNode(state: GraphState): Promise<Partial<GraphState>> {
   const model = getGroqClientFast();
+  const systemPrompt = `You are an AI UI Router. Analyze user queries and determine the best UI component.
 
-  const systemPrompt = `You are an AI UI Router. Analyze user queries and determine the best UI component to generate.
+UI Components:
+- todo-list: task lists, todos, action items with deadlines
+- weather-widget: weather, forecast, temperature queries
+- calculator: math, calculations, unit conversions
+- calendar: scheduling, events, meetings, reminders
+- data-table: structured data, comparisons, tabular content
+- chart: visualizations, graphs, trends, analytics
+- kanban-board: project management, workflow, sprint planning
+- timer: countdowns, Pomodoro, time tracking
+- product-grid: product search, browsing, shopping results, "show me X products", "search for X", "find X under $Y"
+- product-detail: single product deep-dive, "tell me about X product", "show details of X"
+- cart: shopping cart, basket, "my cart", "add to cart", "checkout"
+- order-tracking: order status, delivery tracking, "track my order", "where is my order"
+- text: general chat, explanations, questions
 
-UI Components available:
-- todo-list: For task lists, todos, action items, checklists with deadlines
-- weather-widget: For weather queries, forecasts, temperature
-- calculator: For math, calculations, computations, unit conversions
-- calendar: For scheduling, events, meetings, reminders, date planning
-- data-table: For displaying structured data, comparisons, spreadsheet-like content
-- chart: For visualizations, graphs, trends, analytics, statistics
-- kanban-board: For project management, workflow stages, sprint planning
-- timer: For countdowns, timers, pomodoro sessions, time tracking
-- text: For general chat, explanations, questions without visual UI
+Required tools by type:
+- weather-widget: get_weather
+- calculator: calculate
+- todo-list: prioritize_todos, get_datetime_info
+- calendar: get_datetime_info
+- All ecommerce types: no tools needed (generate mock data)
+- text: no tools
 
-Required tools:
-- todo-list: May need "prioritize_todos" and "get_datetime_info"
-- weather-widget: Needs "get_weather"
-- calculator: Needs "calculate"
-- calendar: Needs "get_datetime_info"
-- kanban-board: May need "prioritize_todos"
-- text: No tools needed
-
-Respond ONLY with valid JSON matching this schema:
-{
-  "uiType": "<component_type>",
-  "confidence": <0.0-1.0>,
-  "requiredTools": ["tool1", "tool2"],
-  "reasoning": "<brief explanation>"
-}`;
+Respond ONLY with valid JSON:
+{"uiType":"<type>","confidence":0.9,"requiredTools":["tool1"],"reasoning":"brief reason"}`;
 
   try {
-    const response = await model.invoke([
-      new SystemMessage(systemPrompt),
-      new HumanMessage(state.currentQuery),
-    ]);
-
+    const response = await model.invoke([new SystemMessage(systemPrompt), new HumanMessage(state.currentQuery)]);
     const content = response.content as string;
     const jsonMatch = content.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) throw new Error("No JSON in response");
-
+    if (!jsonMatch) throw new Error("No JSON");
     const parsed = IntentSchema.parse(JSON.parse(jsonMatch[0]));
-
-    return {
-      detectedIntent: parsed.uiType as GeneratedUIType,
-      toolResults: { _intent: parsed },
-    };
+    return { detectedIntent: parsed.uiType as GeneratedUIType, toolResults: { _intent: parsed } };
   } catch {
-    return {
-      detectedIntent: "text",
-      toolResults: {},
-    };
+    return { detectedIntent: "text", toolResults: {} };
   }
 }
 
-// ─── Node: Tool Execution ─────────────────────────────────────────────────────
-
-export async function executeToolsNode(
-  state: GraphState
-): Promise<Partial<GraphState>> {
+export async function executeToolsNode(state: GraphState): Promise<Partial<GraphState>> {
   const intent = state.toolResults["_intent"] as Intent | undefined;
   if (!intent?.requiredTools?.length) return {};
-
   const toolResults: Record<string, unknown> = { ...state.toolResults };
-
   for (const toolName of intent.requiredTools) {
     const tool = toolsByName[toolName];
     if (!tool) continue;
-
     try {
-      let toolInput: Record<string, unknown> = {};
-
-      // Build tool input based on query context
+      let input: Record<string, unknown> = {};
       if (toolName === "get_weather") {
-        const cityMatch = state.currentQuery.match(
-          /weather (?:in |for )?([a-zA-Z\s,]+)/i
-        );
-        toolInput = { city: cityMatch?.[1]?.trim() ?? "London" };
+        const m = state.currentQuery.match(/weather (?:in |for )?([a-zA-Z\s,]+)/i);
+        input = { city: m?.[1]?.trim() ?? "New York" };
       } else if (toolName === "calculate") {
-        const exprMatch = state.currentQuery.match(
-          /(?:calculate|compute|what is|=)\s*([\d\s+\-*/().^%]+)/i
-        );
-        toolInput = {
-          expression: exprMatch?.[1]?.trim() ?? "0",
-          context: state.currentQuery,
-        };
+        const m = state.currentQuery.match(/(?:calculate|compute|what is|=)\s*([\d\s+\-*/().^%]+)/i);
+        input = { expression: m?.[1]?.trim() ?? "0", context: state.currentQuery };
       } else if (toolName === "prioritize_todos") {
-        // Will be populated by the UI generation node
-        toolInput = { todos: [] };
+        input = { todos: [] };
       } else if (toolName === "get_datetime_info") {
-        toolInput = { query: state.currentQuery };
+        input = { query: state.currentQuery };
       }
-
-      const result = await tool.invoke(toolInput);
+      const result = await tool.invoke(input);
       toolResults[toolName] = JSON.parse(result as string);
-    } catch (err) {
-      toolResults[`${toolName}_error`] = String(err);
-    }
+    } catch (err) { toolResults[`${toolName}_error`] = String(err); }
   }
-
   return { toolResults };
 }
 
-// ─── Node: UI Data Generation ─────────────────────────────────────────────────
-
-export async function generateUIDataNode(
-  state: GraphState
-): Promise<Partial<GraphState>> {
+export async function generateUIDataNode(state: GraphState): Promise<Partial<GraphState>> {
   const model = getGroqClient();
   const intent = state.detectedIntent ?? "text";
   const toolData = JSON.stringify(state.toolResults, null, 2);
+  const today = new Date().toISOString().split("T")[0];
 
-  const uiSchemas: Record<string, string> = {
-    "todo-list": `{
-  "title": "string",
-  "description": "string",
-  "todos": [{
-    "id": "string (uuid-like)",
-    "text": "string",
-    "completed": false,
-    "priority": "critical|high|medium|low",
-    "deadline": "ISO date string or null",
-    "tags": ["string"],
-    "estimatedMinutes": number,
-    "status": "pending|in-progress|completed",
-    "order": number
-  }]
-}`,
-    "weather-widget": `Use the weather tool data directly`,
-    calculator: `{
-  "title": "string",
-  "expression": "string",
-  "result": number,
-  "history": [{"expression": "string", "result": number}]
-}`,
-    calendar: `{
-  "title": "string",
-  "events": [{
-    "id": "string",
-    "title": "string",
-    "date": "YYYY-MM-DD",
-    "time": "HH:MM",
-    "duration": number (minutes),
-    "color": "hex color",
-    "description": "string"
-  }],
-  "initialDate": "YYYY-MM-DD"
-}`,
-    "kanban-board": `{
-  "title": "string",
-  "description": "string",
-  "columns": [{
-    "id": "string",
-    "title": "string",
-    "color": "hex color",
-    "cards": [{
-      "id": "string",
-      "title": "string",
-      "description": "string",
-      "priority": "critical|high|medium|low",
-      "dueDate": "YYYY-MM-DD or null",
-      "tags": ["string"]
-    }]
-  }]
-}`,
-    chart: `{
-  "title": "string",
-  "chartType": "bar|line|pie|area",
-  "labels": ["string"],
-  "datasets": [{
-    "label": "string",
-    "data": [number],
-    "color": "hex"
-  }],
-  "description": "string"
-}`,
-    "data-table": `{
-  "title": "string",
-  "headers": ["string"],
-  "rows": [["cell values"]],
-  "description": "string"
-}`,
-    timer: `{
-  "title": "string",
-  "duration": number (seconds),
-  "label": "string",
-  "type": "countdown|stopwatch|pomodoro"
-}`,
+  const schemas: Record<string, string> = {
+    "todo-list": `{"title":"string","description":"string","todos":[{"id":"nanoid","text":"string","completed":false,"priority":"critical|high|medium|low","deadline":"ISO date or null","tags":["string"],"estimatedMinutes":number,"status":"pending","order":number}]}`,
+    "weather-widget": `Use tool data directly as {"data": <tool_result>}`,
+    "calculator": `{"title":"string","expression":"string","result":number,"history":[{"expression":"string","result":number}]}`,
+    "calendar": `{"title":"string","events":[{"id":"string","title":"string","date":"YYYY-MM-DD","time":"HH:MM","duration":number,"color":"hex","description":"string"}],"initialDate":"YYYY-MM-DD"}`,
+    "kanban-board": `{"title":"string","description":"string","columns":[{"id":"string","title":"string","color":"hex","cards":[{"id":"string","title":"string","description":"string","priority":"critical|high|medium|low","dueDate":"YYYY-MM-DD or null","tags":["string"]}]}]}`,
+    "chart": `{"title":"string","chartType":"bar|line|pie","labels":["string"],"datasets":[{"label":"string","data":[number],"color":"hex"}],"description":"string"}`,
+    "data-table": `{"title":"string","headers":["string"],"rows":[["string or number"]],"description":"string"}`,
+    "timer": `{"title":"string","duration":number,"label":"string","type":"countdown|stopwatch|pomodoro"}`,
+    "product-grid": `{"title":"string","query":"string","description":"string","products":[{"id":"string","name":"string","brand":"string","price":number,"originalPrice":number,"currency":"$","rating":4.5,"reviewCount":1234,"image":"emoji","category":"string","tags":["string"],"inStock":true,"stockCount":number,"description":"string","features":["string"],"badge":"Best Seller|New|Sale|Hot|null"}]}`,
+    "product-detail": `{"product":{"id":"string","name":"string","brand":"string","price":number,"originalPrice":number,"currency":"$","rating":4.5,"reviewCount":1234,"image":"emoji","category":"string","tags":["string"],"inStock":true,"stockCount":number,"description":"string","features":["string"],"badge":"string","reviews":[{"author":"string","rating":5,"comment":"string","date":"string"}],"variants":[{"id":"string","label":"Color|Size|Storage","value":"string","inStock":true}]}}`,
+    "cart": `{"title":"string","items":[{"product":{"id":"string","name":"string","brand":"string","price":number,"currency":"$","image":"emoji","category":"string","tags":[],"inStock":true,"rating":4,"reviewCount":100,"description":""},"quantity":number}],"discount":0.1}`,
+    "order-tracking": `{"title":"string","orderId":"string","product":"string","status":"placed|confirmed|shipped|out-for-delivery|delivered","estimatedDelivery":"string","trackingNumber":"string","steps":[{"id":"placed|confirmed|shipped|out-for-delivery|delivered","label":"string","description":"string","timestamp":"string or null","completed":true,"active":false}]}`,
   };
 
-  const schema = uiSchemas[intent] ?? "Respond conversationally";
+  const ecommerceHints = `
+For product images use relevant emojis: 📱💻🎧⌚🖥️👟👗📷🎮🏋️🎵📚✏️🧴💄🛒
+For product grids: generate 4-8 realistic products matching the query. Include variety of prices, ratings, brands.
+For product detail: include 3-4 reviews, 2-3 variant types (color/size/storage), and 5-6 key features.
+For cart: include 2-4 realistic items with quantities.
+For order tracking: make steps realistic — earlier steps completed, current step active, future steps incomplete.
+`;
 
-  const systemPrompt = `You are a UI data generator. Given a user query, generate structured JSON data for a ${intent} component.
+  const systemPrompt = `You are a UI data generator. Generate structured JSON for a ${intent} component.
 
-${intent === "text" ? "Respond with helpful, conversational markdown text." : `Generate ONLY valid JSON matching this schema:
-${schema}
+Schema: ${schemas[intent] ?? "Respond conversationally in markdown"}
 
-Tool data available: ${toolData}`}
+Today: ${today}
+Tool data: ${toolData}
+${intent.startsWith("product") || intent === "cart" || intent === "order-tracking" ? ecommerceHints : ""}
 
 Rules:
-- Be creative and realistic with data
-- For todos: generate 4-8 realistic tasks based on the user's request
-- Dates should be relative to today: ${new Date().toISOString().split("T")[0]}
-- Make content relevant and helpful
-- ${intent !== "text" ? "Return ONLY the JSON object, no markdown, no explanation" : "Use markdown formatting"}`;
+- Return ONLY valid JSON (no markdown, no explanation) for UI types
+- Be realistic and creative with data matching the user's query
+- For ecommerce: generate compelling, realistic product data with varied prices
+${intent === "text" ? "- Use markdown formatting for text responses" : ""}`;
 
-  const response = await model.invoke([
-    new SystemMessage(systemPrompt),
-    new HumanMessage(state.currentQuery),
-  ]);
-
+  const response = await model.invoke([new SystemMessage(systemPrompt), new HumanMessage(state.currentQuery)]);
   const content = response.content as string;
 
-  if (intent === "text") {
-    return { uiData: null, streamingText: content };
-  }
+  if (intent === "text") return { uiData: null, streamingText: content };
 
   try {
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (!jsonMatch) throw new Error("No JSON");
-    const parsed = JSON.parse(jsonMatch[0]);
-    return { uiData: parsed };
+    return { uiData: JSON.parse(jsonMatch[0]) };
   } catch {
     return { uiData: null, streamingText: content };
   }
 }
 
-// ─── Node: Post-process (AI prioritization for todos) ────────────────────────
-
-export async function postProcessNode(
-  state: GraphState
-): Promise<Partial<GraphState>> {
+export async function postProcessNode(state: GraphState): Promise<Partial<GraphState>> {
   if (state.detectedIntent !== "todo-list" || !state.uiData) return {};
-
   const data = state.uiData as { todos?: Array<{ id: string; text: string; deadline?: string; tags?: string[] }> };
   if (!data.todos?.length) return {};
-
   try {
     const { prioritizationTool } = await import("@/lib/langchain/tools");
     const result = await prioritizationTool.invoke({ todos: data.todos });
     const priorityMap = JSON.parse(result as string) as Record<string, string>;
-
-    const updatedTodos = data.todos.map((todo, index) => ({
-      ...todo,
-      priority: priorityMap[todo.id] ?? "medium",
-      order: index,
-      status: "pending" as const,
-      completed: false,
-    }));
-
-    return {
-      uiData: { ...data, todos: updatedTodos },
-    };
-  } catch {
-    return {};
-  }
+    return { uiData: { ...data, todos: data.todos.map((t, i) => ({ ...t, priority: priorityMap[t.id] ?? "medium", order: i, status: "pending", completed: false })) } };
+  } catch { return {}; }
 }
 
-// ─── Main Graph Executor ──────────────────────────────────────────────────────
+export interface GraphRunResult { uiType: GeneratedUIType; uiData: unknown; text: string }
 
-export interface GraphRunResult {
-  uiType: GeneratedUIType;
-  uiData: unknown;
-  text: string;
-}
-
-export async function runGraph(
-  query: string,
-  messageHistory: Array<{ role: string; content: string }> = []
-): Promise<GraphRunResult> {
-  let state: GraphState = {
-    messages: [],
-    currentQuery: query,
-    detectedIntent: null,
-    toolResults: {},
-    uiData: null,
-    streamingText: "",
-  };
-
-  // Node 1: Detect Intent
-  const intentResult = await detectIntentNode(state);
-  state = { ...state, ...intentResult };
-
-  // Node 2: Execute Tools (conditional)
+export async function runGraph(query: string, _history: Array<{role:string;content:string}> = []): Promise<GraphRunResult> {
+  let state: GraphState = { messages: [], currentQuery: query, detectedIntent: null, toolResults: {}, uiData: null, streamingText: "" };
+  const intentResult = await detectIntentNode(state); state = { ...state, ...intentResult };
   const intent = state.toolResults["_intent"] as Intent | undefined;
   if (intent?.requiredTools?.length && intent.requiredTools[0] !== "") {
-    const toolResult = await executeToolsNode(state);
-    state = { ...state, ...toolResult };
+    state = { ...state, ...await executeToolsNode(state) };
   }
-
-  // Node 3: Generate UI Data
-  const uiResult = await generateUIDataNode(state);
-  state = { ...state, ...uiResult };
-
-  // Node 4: Post-process (AI prioritization)
-  if (state.detectedIntent === "todo-list") {
-    const ppResult = await postProcessNode(state);
-    state = { ...state, ...ppResult };
-  }
-
-  return {
-    uiType: state.detectedIntent ?? "text",
-    uiData: state.uiData,
-    text: state.streamingText,
-  };
+  state = { ...state, ...await generateUIDataNode(state) };
+  if (state.detectedIntent === "todo-list") state = { ...state, ...await postProcessNode(state) };
+  return { uiType: state.detectedIntent ?? "text", uiData: state.uiData, text: state.streamingText };
 }

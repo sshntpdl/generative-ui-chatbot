@@ -104,7 +104,7 @@ function SortableTodoItem({ item, onToggle, onDelete, onPriorityChange }: Sortab
         {...attributes}
         {...listeners}
         className="mt-0.5 shrink-0 opacity-0 group-hover:opacity-40 hover:!opacity-80 transition-opacity drag-handle-cursor"
-        style={{ color: "hsl(var(--ink-faint))", touchAction: "none" }}
+        style={{ color: "var(--text-muted)", touchAction: "none" }}
       >
         <GripVertical className="w-4 h-4" />
       </button>
@@ -114,7 +114,7 @@ function SortableTodoItem({ item, onToggle, onDelete, onPriorityChange }: Sortab
         onClick={() => onToggle(item.id)}
         className="mt-0.5 shrink-0 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all"
         style={{
-          borderColor: item.completed ? p.color : "hsl(var(--border))",
+          borderColor: item.completed ? p.color : "var(--border-base)",
           background: item.completed ? p.color : "transparent",
           transition: "all 0.2s",
         }}
@@ -127,7 +127,7 @@ function SortableTodoItem({ item, onToggle, onDelete, onPriorityChange }: Sortab
         <p
           className="text-sm leading-relaxed"
           style={{
-            color: item.completed ? "hsl(var(--ink-faint))" : "hsl(var(--ink))",
+            color: item.completed ? "var(--text-muted)" : "var(--text-primary)",
             textDecoration: item.completed ? "line-through" : "none",
             transition: "all 0.2s",
           }}
@@ -152,8 +152,8 @@ function SortableTodoItem({ item, onToggle, onDelete, onPriorityChange }: Sortab
               <div
                 className="absolute top-full mt-1 left-0 z-50 rounded-xl overflow-hidden shadow-lg"
                 style={{
-                  background: "hsl(var(--surface-elevated))",
-                  border: "1px solid hsl(var(--border))",
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--border-base)",
                   minWidth: "120px",
                 }}
               >
@@ -194,7 +194,7 @@ function SortableTodoItem({ item, onToggle, onDelete, onPriorityChange }: Sortab
                   : isDueSoon
                   ? "rgba(251,146,60,0.1)"
                   : "rgba(255,255,255,0.05)",
-                color: isOverdue ? "#f87171" : isDueSoon ? "#fb923c" : "hsl(var(--ink-faint))",
+                color: isOverdue ? "#f87171" : isDueSoon ? "#fb923c" : "var(--text-muted)",
               }}
             >
               <Calendar className="w-3 h-3" />
@@ -212,8 +212,8 @@ function SortableTodoItem({ item, onToggle, onDelete, onPriorityChange }: Sortab
               key={tag}
               className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs"
               style={{
-                background: "hsl(var(--brand-subtle))",
-                color: "hsl(var(--brand))",
+                background: "var(--accent-subtle)",
+                color: "var(--accent-1)",
               }}
             >
               <Tag className="w-2.5 h-2.5" />
@@ -225,7 +225,7 @@ function SortableTodoItem({ item, onToggle, onDelete, onPriorityChange }: Sortab
           {item.estimatedMinutes && (
             <div
               className="flex items-center gap-1 text-xs"
-              style={{ color: "hsl(var(--ink-faint))" }}
+              style={{ color: "var(--text-muted)" }}
             >
               <Clock className="w-3 h-3" />
               {item.estimatedMinutes}m
@@ -373,29 +373,29 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
     <div
       className="rounded-2xl overflow-hidden w-full"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
         maxWidth: "640px",
       }}
     >
       {/* Header */}
       <div
         className="px-5 pt-5 pb-4"
-        style={{ borderBottom: "1px solid hsl(var(--border))" }}
+        style={{ borderBottom: "1px solid var(--border-base)" }}
       >
         <div className="flex items-start justify-between mb-3">
           <div>
             <h3
               className="text-base font-semibold"
               style={{
-                fontFamily: "var(--font-display)",
-                color: "hsl(var(--ink))",
+                fontFamily: "'Poppins', sans-serif",
+                color: "var(--text-primary)",
               }}
             >
               {title ?? "Task List"}
             </h3>
             {description && (
-              <p className="text-xs mt-0.5" style={{ color: "hsl(var(--ink-muted))" }}>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
                 {description}
               </p>
             )}
@@ -405,9 +405,9 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
             disabled={isReprioritizing || todos.length === 0}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all hover:scale-105 disabled:opacity-50"
             style={{
-              background: "hsl(var(--brand-subtle))",
-              border: "1px solid hsl(var(--brand-dim))",
-              color: "hsl(var(--brand))",
+              background: "var(--accent-subtle)",
+              border: "1px solid var(--accent-1)",
+              color: "var(--accent-1)",
             }}
           >
             <Sparkles className={`w-3 h-3 ${isReprioritizing ? "animate-spin" : ""}`} />
@@ -419,22 +419,22 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
         <div className="flex items-center gap-3">
           <div
             className="flex-1 h-1.5 rounded-full overflow-hidden"
-            style={{ background: "hsl(var(--surface-sunken))" }}
+            style={{ background: "var(--bg-base)" }}
           >
             <div
               className="h-full rounded-full transition-all duration-500"
               style={{
                 width: `${progress}%`,
                 background:
-                  "linear-gradient(90deg, hsl(var(--brand)) 0%, hsl(var(--accent)) 100%)",
+                  "linear-gradient(90deg, var(--accent-1) 0%, var(--info) 100%)",
               }}
             />
           </div>
           <span
             className="text-xs shrink-0"
             style={{
-              color: "hsl(var(--ink-faint))",
-              fontFamily: "var(--font-mono)",
+              color: "var(--text-muted)",
+              fontFamily: "'Geist Mono', monospace",
             }}
           >
             {completedCount}/{todos.length}
@@ -443,15 +443,15 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 px-5 py-2" style={{ borderBottom: "1px solid hsl(var(--border))" }}>
+      <div className="flex gap-1 px-5 py-2" style={{ borderBottom: "1px solid var(--border-base)" }}>
         {(["all", "pending", "completed"] as const).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f)}
             className="px-3 py-1 rounded-lg text-xs font-medium capitalize transition-all"
             style={{
-              background: filter === f ? "hsl(var(--brand-subtle))" : "transparent",
-              color: filter === f ? "hsl(var(--brand))" : "hsl(var(--ink-faint))",
+              background: filter === f ? "var(--accent-subtle)" : "transparent",
+              color: filter === f ? "var(--accent-1)" : "var(--text-muted)",
             }}
           >
             {f}
@@ -473,7 +473,7 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
             {filteredTodos.length === 0 ? (
               <div
                 className="py-8 text-center text-sm"
-                style={{ color: "hsl(var(--ink-faint))" }}
+                style={{ color: "var(--text-muted)" }}
               >
                 {filter === "completed" ? "No completed tasks yet" : "No tasks here"}
               </div>
@@ -495,7 +495,7 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
       {/* Add new task */}
       <div
         className="flex items-center gap-2 px-4 py-3"
-        style={{ borderTop: "1px solid hsl(var(--border))" }}
+        style={{ borderTop: "1px solid var(--border-base)" }}
       >
         <input
           type="text"
@@ -505,8 +505,8 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
           placeholder="Add a new task…"
           className="flex-1 bg-transparent text-sm outline-none"
           style={{
-            color: "hsl(var(--ink))",
-            caretColor: "hsl(var(--brand))",
+            color: "var(--text-primary)",
+            caretColor: "var(--accent-1)",
           }}
         />
         <button
@@ -514,8 +514,8 @@ export function TodoList({ title, description, todos: initialTodos }: TodoListPr
           disabled={!newTask.trim()}
           className="w-7 h-7 rounded-lg flex items-center justify-center transition-all disabled:opacity-30"
           style={{
-            background: "hsl(var(--brand-subtle))",
-            color: "hsl(var(--brand))",
+            background: "var(--accent-subtle)",
+            color: "var(--accent-1)",
           }}
         >
           <Plus className="w-4 h-4" />

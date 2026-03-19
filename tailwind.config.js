@@ -8,56 +8,33 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
-        display: ["var(--font-display)", "serif"],
+        sans:    ["Inter", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        poppins: ["Poppins", "sans-serif"],
+        mono:    ["Geist Mono", "monospace"],
       },
       colors: {
-        surface: {
-          DEFAULT: "hsl(var(--surface))",
-          elevated: "hsl(var(--surface-elevated))",
-          sunken: "hsl(var(--surface-sunken))",
-        },
-        brand: {
-          DEFAULT: "hsl(var(--brand))",
-          dim: "hsl(var(--brand-dim))",
-          subtle: "hsl(var(--brand-subtle))",
-        },
-        ink: {
-          DEFAULT: "hsl(var(--ink))",
-          muted: "hsl(var(--ink-muted))",
-          faint: "hsl(var(--ink-faint))",
-        },
-        border: "hsl(var(--border))",
-        accent: "hsl(var(--accent))",
-      },
-      keyframes: {
-        "slide-up": {
-          from: { opacity: 0, transform: "translateY(12px)" },
-          to: { opacity: 1, transform: "translateY(0)" },
-        },
-        shimmer: {
-          "0%": { backgroundPosition: "-200% 0" },
-          "100%": { backgroundPosition: "200% 0" },
-        },
-        pulse_ring: {
-          "0%, 100%": { opacity: 1, transform: "scale(1)" },
-          "50%": { opacity: 0.5, transform: "scale(1.05)" },
-        },
-        "fade-in": {
-          from: { opacity: 0 },
-          to: { opacity: 1 },
-        },
-        typewriter: {
-          from: { width: 0 },
-          to: { width: "100%" },
-        },
+        "bg-base":      "var(--bg-base)",
+        "bg-surface":   "var(--bg-surface)",
+        "bg-elevated":  "var(--bg-elevated)",
+        "bg-hover":     "var(--bg-hover)",
+        "text-primary":   "var(--text-primary)",
+        "text-secondary": "var(--text-secondary)",
+        "text-muted":     "var(--text-muted)",
+        "accent":         "var(--accent-1)",
+        "accent-2":       "var(--accent-2)",
+        "border-subtle":  "var(--border-subtle)",
+        "border-base":    "var(--border-base)",
       },
       animation: {
-        "slide-up": "slide-up 0.3s ease-out",
-        shimmer: "shimmer 2s linear infinite",
-        pulse_ring: "pulse_ring 2s ease-in-out infinite",
-        "fade-in": "fade-in 0.4s ease-out",
+        "slide-up":  "slide-up .28s cubic-bezier(.16,1,.3,1) both",
+        "scale-in":  "scale-in .24s cubic-bezier(.16,1,.3,1) both",
+        "fade-in":   "fade-in .3s ease both",
+        "float":     "float-up 3s ease-in-out infinite",
+        "spin-slow": "spin 3s linear infinite",
+      },
+      borderRadius: {
+        "2xl": "16px",
+        "3xl": "24px",
       },
     },
   },

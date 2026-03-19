@@ -1,35 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { ThemeProvider } from "@/lib/theme";
 
 export const metadata: Metadata = {
-  title: "Generative UI Chatbot",
-  description:
-    "AI-powered chatbot that generates interactive React components on the fly using Groq, LangGraph, and Vercel AI SDK",
-  keywords: ["AI", "chatbot", "generative UI", "React", "LangGraph", "Groq"],
+  title: "GenUI — AI Chat",
+  description: "AI-powered chat that generates interactive UI components on the fly",
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0b0f",
   width: "device-width",
   initialScale: 1,
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" data-theme="midnight" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className="antialiased">{children}</body>
+      <body>
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

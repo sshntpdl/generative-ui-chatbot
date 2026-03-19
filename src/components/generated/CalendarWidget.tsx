@@ -55,33 +55,33 @@ export function CalendarWidget({ title, events: initialEvents, initialDate }: Ca
     <div
       className="rounded-2xl overflow-hidden w-full"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
         maxWidth: "420px",
       }}
     >
       {/* Header */}
       <div
         className="flex items-center justify-between px-5 py-4"
-        style={{ borderBottom: "1px solid hsl(var(--border))" }}
+        style={{ borderBottom: "1px solid var(--border-base)" }}
       >
         <h3
           className="text-base font-semibold"
-          style={{ fontFamily: "var(--font-display)", color: "hsl(var(--ink))" }}
+          style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-primary)" }}
         >
           {title ?? "Calendar"}
         </h3>
         <div className="flex items-center gap-2">
           <button onClick={prevMonth} className="p-1.5 rounded-lg transition-all hover:opacity-70"
-            style={{ color: "hsl(var(--ink-muted))" }}>
+            style={{ color: "var(--text-secondary)" }}>
             <ChevronLeft className="w-4 h-4" />
           </button>
           <span className="text-sm font-medium w-32 text-center"
-            style={{ color: "hsl(var(--ink))", fontFamily: "var(--font-display)" }}>
+            style={{ color: "var(--text-primary)", fontFamily: "'Poppins', sans-serif" }}>
             {MONTHS[current.getMonth()]} {current.getFullYear()}
           </span>
           <button onClick={nextMonth} className="p-1.5 rounded-lg transition-all hover:opacity-70"
-            style={{ color: "hsl(var(--ink-muted))" }}>
+            style={{ color: "var(--text-secondary)" }}>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -92,7 +92,7 @@ export function CalendarWidget({ title, events: initialEvents, initialDate }: Ca
         <div className="grid grid-cols-7 mb-1">
           {DAYS.map((d) => (
             <div key={d} className="text-center text-xs py-1 font-medium"
-              style={{ color: "hsl(var(--ink-faint))" }}>
+              style={{ color: "var(--text-muted)" }}>
               {d}
             </div>
           ))}
@@ -114,18 +114,18 @@ export function CalendarWidget({ title, events: initialEvents, initialDate }: Ca
                 className="relative aspect-square flex flex-col items-center justify-start pt-1 rounded-lg text-sm transition-all"
                 style={{
                   background: sel
-                    ? "linear-gradient(135deg, hsl(var(--brand)) 0%, hsl(var(--accent)) 100%)"
+                    ? "linear-gradient(135deg, var(--accent-1) 0%, var(--info) 100%)"
                     : tod
-                    ? "hsl(var(--brand-subtle))"
+                    ? "var(--accent-subtle)"
                     : "transparent",
-                  color: sel ? "white" : tod ? "hsl(var(--brand))" : "hsl(var(--ink))",
+                  color: sel ? "white" : tod ? "var(--accent-1)" : "var(--text-primary)",
                   fontWeight: tod || sel ? "700" : "400",
                 }}
                 onMouseEnter={(e) => {
                   if (!sel) (e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.06)";
                 }}
                 onMouseLeave={(e) => {
-                  if (!sel) (e.currentTarget as HTMLButtonElement).style.background = tod ? "hsl(var(--brand-subtle))" : "transparent";
+                  if (!sel) (e.currentTarget as HTMLButtonElement).style.background = tod ? "var(--accent-subtle)" : "transparent";
                 }}
               >
                 {day}
@@ -135,7 +135,7 @@ export function CalendarWidget({ title, events: initialEvents, initialDate }: Ca
                       <div
                         key={di}
                         className="w-1 h-1 rounded-full"
-                        style={{ background: sel ? "rgba(255,255,255,0.7)" : "hsl(var(--brand))" }}
+                        style={{ background: sel ? "rgba(255,255,255,0.7)" : "var(--accent-1)" }}
                       />
                     ))}
                   </div>
@@ -150,24 +150,24 @@ export function CalendarWidget({ title, events: initialEvents, initialDate }: Ca
       {selected && (
         <div
           className="px-4 py-3"
-          style={{ borderTop: "1px solid hsl(var(--border))" }}
+          style={{ borderTop: "1px solid var(--border-base)" }}
         >
           <p className="text-xs font-medium mb-2"
-            style={{ color: "hsl(var(--ink-faint))", fontFamily: "var(--font-mono)" }}>
+            style={{ color: "var(--text-muted)", fontFamily: "'Geist Mono', monospace" }}>
             {selected.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" }).toUpperCase()}
           </p>
           {selectedDayEvents.length === 0 ? (
-            <p className="text-xs" style={{ color: "hsl(var(--ink-faint))" }}>
+            <p className="text-xs" style={{ color: "var(--text-muted)" }}>
               No events
             </p>
           ) : (
             selectedDayEvents.map((ev) => (
               <div key={ev.id} className="flex items-center gap-2 py-1">
                 <div className="w-2 h-2 rounded-full shrink-0"
-                  style={{ background: ev.color ?? "hsl(var(--brand))" }} />
-                <span className="text-sm" style={{ color: "hsl(var(--ink))" }}>{ev.title}</span>
+                  style={{ background: ev.color ?? "var(--accent-1)" }} />
+                <span className="text-sm" style={{ color: "var(--text-primary)" }}>{ev.title}</span>
                 {ev.time && (
-                  <span className="text-xs ml-auto" style={{ color: "hsl(var(--ink-faint))" }}>
+                  <span className="text-xs ml-auto" style={{ color: "var(--text-muted)" }}>
                     {ev.time}
                   </span>
                 )}
@@ -184,15 +184,15 @@ export function CalendarWidget({ title, events: initialEvents, initialDate }: Ca
               className="flex-1 text-xs bg-transparent outline-none px-2 py-1.5 rounded-lg"
               style={{
                 background: "rgba(255,255,255,0.04)",
-                border: "1px solid hsl(var(--border))",
-                color: "hsl(var(--ink))",
+                border: "1px solid var(--border-base)",
+                color: "var(--text-primary)",
               }}
             />
             <button
               onClick={handleAddEvent}
               disabled={!newEventTitle.trim()}
               className="p-1.5 rounded-lg disabled:opacity-30"
-              style={{ background: "hsl(var(--brand-subtle))", color: "hsl(var(--brand))" }}
+              style={{ background: "var(--accent-subtle)", color: "var(--accent-1)" }}
             >
               <Plus className="w-4 h-4" />
             </button>

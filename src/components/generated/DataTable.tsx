@@ -52,23 +52,23 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
     <div
       className="rounded-2xl overflow-hidden w-full"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
         maxWidth: "720px",
       }}
     >
       {/* Header */}
-      <div className="px-5 py-4" style={{ borderBottom: "1px solid hsl(var(--border))" }}>
+      <div className="px-5 py-4" style={{ borderBottom: "1px solid var(--border-base)" }}>
         <div className="flex items-center justify-between gap-3">
           <div>
             <h3
               className="text-base font-semibold"
-              style={{ fontFamily: "var(--font-display)", color: "hsl(var(--ink))" }}
+              style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-primary)" }}
             >
               {title ?? "Data Table"}
             </h3>
             {description && (
-              <p className="text-xs mt-0.5" style={{ color: "hsl(var(--ink-muted))" }}>
+              <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
                 {description}
               </p>
             )}
@@ -76,18 +76,18 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
           <div
             className="flex items-center gap-2 px-3 py-1.5 rounded-xl"
             style={{
-              background: "hsl(var(--surface-sunken))",
-              border: "1px solid hsl(var(--border))",
+              background: "var(--bg-base)",
+              border: "1px solid var(--border-base)",
             }}
           >
-            <Search className="w-3.5 h-3.5" style={{ color: "hsl(var(--ink-faint))" }} />
+            <Search className="w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} />
             <input
               type="text"
               value={query}
               onChange={(e) => { setQuery(e.target.value); setPage(0); }}
               placeholder="Search..."
               className="bg-transparent text-sm outline-none w-32"
-              style={{ color: "hsl(var(--ink))" }}
+              style={{ color: "var(--text-primary)" }}
             />
           </div>
         </div>
@@ -97,16 +97,16 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr style={{ background: "hsl(var(--surface-sunken))" }}>
+            <tr style={{ background: "var(--bg-base)" }}>
               {headers.map((h, i) => (
                 <th
                   key={i}
                   onClick={() => handleSort(i)}
                   className="px-4 py-2.5 text-left font-medium cursor-pointer select-none"
                   style={{
-                    color: sortCol === i ? "hsl(var(--brand))" : "hsl(var(--ink-muted))",
-                    borderBottom: "1px solid hsl(var(--border))",
-                    fontFamily: "var(--font-mono)",
+                    color: sortCol === i ? "var(--accent-1)" : "var(--text-secondary)",
+                    borderBottom: "1px solid var(--border-base)",
+                    fontFamily: "'Geist Mono', monospace",
                     fontSize: "0.75rem",
                     letterSpacing: "0.05em",
                   }}
@@ -126,7 +126,7 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
                 <td
                   colSpan={headers.length}
                   className="px-4 py-8 text-center"
-                  style={{ color: "hsl(var(--ink-faint))" }}
+                  style={{ color: "var(--text-muted)" }}
                 >
                   No results found
                 </td>
@@ -135,7 +135,7 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
               paged.map((row, ri) => (
                 <tr
                   key={ri}
-                  style={{ borderBottom: "1px solid hsl(var(--border))" }}
+                  style={{ borderBottom: "1px solid var(--border-base)" }}
                   onMouseEnter={(e) =>
                     ((e.currentTarget as HTMLTableRowElement).style.background = "rgba(255,255,255,0.02)")
                   }
@@ -147,7 +147,7 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
                     <td
                       key={ci}
                       className="px-4 py-2.5"
-                      style={{ color: "hsl(var(--ink))" }}
+                      style={{ color: "var(--text-primary)" }}
                     >
                       {String(cell)}
                     </td>
@@ -163,9 +163,9 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
       {totalPages > 1 && (
         <div
           className="flex items-center justify-between px-5 py-3"
-          style={{ borderTop: "1px solid hsl(var(--border))" }}
+          style={{ borderTop: "1px solid var(--border-base)" }}
         >
-          <span className="text-xs" style={{ color: "hsl(var(--ink-faint))", fontFamily: "var(--font-mono)" }}>
+          <span className="text-xs" style={{ color: "var(--text-muted)", fontFamily: "'Geist Mono', monospace" }}>
             {filtered.length} rows · Page {page + 1}/{totalPages}
           </span>
           <div className="flex gap-2">
@@ -173,7 +173,7 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
               onClick={() => setPage((p) => Math.max(0, p - 1))}
               disabled={page === 0}
               className="px-3 py-1 rounded-lg text-xs transition-all disabled:opacity-30"
-              style={{ background: "hsl(var(--surface-sunken))", color: "hsl(var(--ink-muted))" }}
+              style={{ background: "var(--bg-base)", color: "var(--text-secondary)" }}
             >
               ← Prev
             </button>
@@ -181,7 +181,7 @@ export function DataTable({ title, description, headers, rows }: DataTableProps)
               onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
               disabled={page >= totalPages - 1}
               className="px-3 py-1 rounded-lg text-xs transition-all disabled:opacity-30"
-              style={{ background: "hsl(var(--surface-sunken))", color: "hsl(var(--ink-muted))" }}
+              style={{ background: "var(--bg-base)", color: "var(--text-secondary)" }}
             >
               Next →
             </button>

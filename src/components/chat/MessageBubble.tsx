@@ -6,89 +6,159 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Bot, User } from "lucide-react";
 
-interface MessageBubbleProps {
-  message: ChatMessage;
-  isLatest: boolean;
-  isLoading: boolean;
-}
+interface Props { message: ChatMessage; isLatest: boolean; isLoading: boolean }
 
-export function MessageBubble({ message, isLatest, isLoading }: MessageBubbleProps) {
+export function MessageBubble({ message, isLatest, isLoading }: Props) {
   const isUser = message.role === "user";
-  const isAssistant = message.role === "assistant";
-  const hasUI = isAssistant && message.uiComponent && message.uiComponent !== "text";
-  const isEmpty = isAssistant && !message.content && !hasUI;
+  const hasUI  = message.role === "assistant" && message.uiComponent && message.uiComponent !== "text";
+  const isEmpty = message.role === "assistant" && !message.content && !hasUI;
 
-  return (
-    <div className={`flex gap-3 animate-slide-up ${isUser ? "flex-row-reverse" : "flex-row"}`}>
-      <div
-        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 mt-0.5"
-        style={{
-          background: isUser
-            ? "linear-gradient(135deg, hsl(var(--brand-dim)) 0%, hsl(var(--brand)) 100%)"
-            : "hsl(var(--surface-elevated))",
-          border: isUser ? "none" : "1px solid hsl(var(--border))",
-        }}
-      >
-        {isUser ? (
-          <User className="w-4 h-4 text-white" />
-        ) : (
-          <Bot className="w-4 h-4" style={{ color: "hsl(var(--brand))" }} />
-        )}
-      </div>
+  const timestamp = message.timestamp.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 
-      <div className={`flex-1 min-w-0 ${isUser ? "flex justify-end" : ""}`}>
-        {isUser && (
+  /* ─── Shared styles ─────────────────────────────────────── */
+  const outerRow: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "flex-end",
+    gap: "10px",
+    width: "100%",
+    marginBottom: "2px",
+  };
+
+  const avatarStyle: React.CSSProperties = {
+    width: "32px",
+    height: "32px",
+    borderRadius: "50%",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+  };
+
+  const tsStyle: React.CSSProperties = {
+    display: "block",
+    fontSize: "11px",
+    color: "var(--text-muted)",
+    marginTop: "4px",
+    lineHeight: 1,
+  };
+
+  /* ─── USER ──────────────────────────────────────────────── */
+  if (isUser) {
+    return (
+      <div style={{ width: "100%" }}>
+        {/* Row: bubble → avatar (right side) */}
+        <div style={{ ...outerRow, justifyContent: "flex-end" }}>
           <div
-            className="inline-block max-w-[85%] px-4 py-3 rounded-2xl rounded-tr-sm text-sm leading-relaxed"
             style={{
-              background: "linear-gradient(135deg, hsl(var(--brand-dim)) 0%, hsl(var(--brand)) 100%)",
-              color: "white",
+              background: "var(--user-bubble)",
+              color: "var(--user-text)",
+              padding: "10px 16px",
+              borderRadius: "18px 18px 4px 18px",
+              fontSize: "14px",
+              lineHeight: "1.65",
+              maxWidth: "72%",
+              wordBreak: "break-word",
+              fontFamily: "'Inter', sans-serif",
             }}
           >
             {message.content}
           </div>
-        )}
-
-        {isAssistant && (
-          <>
-            {isEmpty && isLoading && (
-              <div
-                className="inline-flex items-center gap-1 px-4 py-3 rounded-2xl rounded-tl-sm"
-                style={{ background: "hsl(var(--surface-elevated))", border: "1px solid hsl(var(--border))" }}
-              >
-                <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--brand))" }} />
-                <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--brand))" }} />
-                <span className="typing-dot w-1.5 h-1.5 rounded-full" style={{ background: "hsl(var(--brand))" }} />
-              </div>
-            )}
-
-            {message.content && !hasUI && (
-              <div
-                className="max-w-[90%] px-4 py-3 rounded-2xl rounded-tl-sm prose-chat"
-                style={{ background: "hsl(var(--surface-elevated))", border: "1px solid hsl(var(--border))" }}
-              >
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
-              </div>
-            )}
-
-            {hasUI && message.metadata?.componentData && (
-              <div className="w-full max-w-[95%]">
-                <GeneratedUIRenderer
-                  type={message.uiComponent!}
-                  data={message.metadata.componentData}
-                  isLatest={isLatest}
-                />
-              </div>
-            )}
-          </>
-        )}
-
-        <div
-          className={`mt-1 text-xs ${isUser ? "text-right" : "text-left"}`}
-          style={{ color: "hsl(var(--ink-faint))" }}
-        >
-          {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+          <div
+            style={{
+              ...avatarStyle,
+              background: "var(--user-bubble)",
+            }}
+          >
+            <User style={{ width: "14px", height: "14px", color: "var(--user-text)" }} />
+          </div>
         </div>
+        {/* Timestamp: right-aligned, indented to sit under bubble (not avatar) */}
+        <div style={{ textAlign: "right", paddingRight: "42px" }}>
+          <span style={tsStyle}>{timestamp}</span>
+        </div>
+      </div>
+    );
+  }
+
+  /* ─── ASSISTANT ─────────────────────────────────────────── */
+  return (
+    <div style={{ width: "100%" }}>
+      {/* Row: avatar → content */}
+      <div style={{ ...outerRow, justifyContent: "flex-start" }}>
+        <div
+          style={{
+            ...avatarStyle,
+            background: "var(--bg-elevated)",
+            border: "1px solid var(--border-base)",
+          }}
+        >
+          <Bot style={{ width: "14px", height: "14px", color: "var(--accent-1)" }} />
+        </div>
+
+        <div style={{ flex: 1, minWidth: 0, maxWidth: hasUI ? "calc(100% - 42px)" : "75%" }}>
+          {/* Typing dots */}
+          {isEmpty && isLoading && (
+            <div
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "12px 16px",
+                borderRadius: "18px 18px 18px 4px",
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              {[0, 1, 2].map(i => (
+                <span
+                  key={i}
+                  className="typing-dot"
+                  style={{
+                    display: "block",
+                    width: "7px",
+                    height: "7px",
+                    borderRadius: "50%",
+                    background: "var(--accent-1)",
+                  }}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Text response */}
+          {message.content && !hasUI && (
+            <div
+              className="prose-chat"
+              style={{
+                padding: "10px 16px",
+                borderRadius: "18px 18px 18px 4px",
+                background: "var(--bg-elevated)",
+                border: "1px solid var(--border-subtle)",
+                wordBreak: "break-word",
+              }}
+            >
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
+            </div>
+          )}
+
+          {/* Generated UI component */}
+          {hasUI && message.metadata?.componentData && (
+            <GeneratedUIRenderer
+              type={message.uiComponent!}
+              data={message.metadata.componentData}
+              isLatest={isLatest}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Timestamp: left-aligned, indented past avatar */}
+      <div style={{ paddingLeft: "42px" }}>
+        <span style={tsStyle}>{timestamp}</span>
       </div>
     </div>
   );

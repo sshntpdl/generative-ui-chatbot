@@ -49,7 +49,7 @@ function KanbanCardComponent({ card }: { card: KanbanCard }) {
         <button
           {...listeners}
           className="mt-0.5 shrink-0 opacity-0 group-hover:opacity-40 drag-handle-cursor"
-          style={{ color: "hsl(var(--ink-faint))", touchAction: "none" }}
+          style={{ color: "var(--text-muted)", touchAction: "none" }}
         >
           <GripVertical className="w-3 h-3" />
         </button>
@@ -59,12 +59,12 @@ function KanbanCardComponent({ card }: { card: KanbanCard }) {
               className="w-2 h-2 rounded-full shrink-0"
               style={{ background: PRIORITY_DOTS[card.priority] ?? "#facc15" }}
             />
-            <p className="text-sm leading-snug" style={{ color: "hsl(var(--ink))" }}>
+            <p className="text-sm leading-snug" style={{ color: "var(--text-primary)" }}>
               {card.title}
             </p>
           </div>
           {card.description && (
-            <p className="text-xs mb-2 ml-4" style={{ color: "hsl(var(--ink-muted))" }}>
+            <p className="text-xs mb-2 ml-4" style={{ color: "var(--text-secondary)" }}>
               {card.description}
             </p>
           )}
@@ -72,7 +72,7 @@ function KanbanCardComponent({ card }: { card: KanbanCard }) {
             {card.dueDate && (
               <div
                 className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs"
-                style={{ background: "rgba(255,255,255,0.05)", color: "hsl(var(--ink-faint))" }}
+                style={{ background: "rgba(255,255,255,0.05)", color: "var(--text-muted)" }}
               >
                 <Calendar className="w-2.5 h-2.5" />
                 {formatDate(card.dueDate)}
@@ -83,8 +83,8 @@ function KanbanCardComponent({ card }: { card: KanbanCard }) {
                 key={tag}
                 className="flex items-center gap-1 px-1.5 py-0.5 rounded text-xs"
                 style={{
-                  background: "hsl(var(--brand-subtle))",
-                  color: "hsl(var(--brand))",
+                  background: "var(--accent-subtle)",
+                  color: "var(--accent-1)",
                 }}
               >
                 {tag}
@@ -170,23 +170,23 @@ export function KanbanBoard({ title, description, columns: initialColumns }: Kan
     <div
       className="rounded-2xl overflow-hidden w-full"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
         maxWidth: "800px",
       }}
     >
       <div
         className="px-5 py-4"
-        style={{ borderBottom: "1px solid hsl(var(--border))" }}
+        style={{ borderBottom: "1px solid var(--border-base)" }}
       >
         <h3
           className="text-base font-semibold"
-          style={{ fontFamily: "var(--font-display)", color: "hsl(var(--ink))" }}
+          style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-primary)" }}
         >
           {title ?? "Kanban Board"}
         </h3>
         {description && (
-          <p className="text-xs mt-0.5" style={{ color: "hsl(var(--ink-muted))" }}>
+          <p className="text-xs mt-0.5" style={{ color: "var(--text-secondary)" }}>
             {description}
           </p>
         )}
@@ -209,23 +209,23 @@ export function KanbanBoard({ title, description, columns: initialColumns }: Kan
                 className="flex-1 rounded-xl flex flex-col"
                 style={{
                   background: "rgba(255,255,255,0.02)",
-                  border: "1px solid hsl(var(--border))",
+                  border: "1px solid var(--border-base)",
                   minWidth: "200px",
                 }}
               >
                 {/* Column header */}
                 <div
                   className="flex items-center justify-between px-3 py-2.5"
-                  style={{ borderBottom: "1px solid hsl(var(--border))" }}
+                  style={{ borderBottom: "1px solid var(--border-base)" }}
                 >
                   <div className="flex items-center gap-2">
                     <div
                       className="w-2 h-2 rounded-full"
-                      style={{ background: col.color ?? "hsl(var(--brand))" }}
+                      style={{ background: col.color ?? "var(--accent-1)" }}
                     />
                     <span
                       className="text-sm font-medium"
-                      style={{ color: "hsl(var(--ink))" }}
+                      style={{ color: "var(--text-primary)" }}
                     >
                       {col.title}
                     </span>
@@ -233,7 +233,7 @@ export function KanbanBoard({ title, description, columns: initialColumns }: Kan
                       className="text-xs px-1.5 py-0.5 rounded-full"
                       style={{
                         background: "rgba(255,255,255,0.06)",
-                        color: "hsl(var(--ink-faint))",
+                        color: "var(--text-muted)",
                       }}
                     >
                       {col.cards.length}
@@ -252,8 +252,8 @@ export function KanbanBoard({ title, description, columns: initialColumns }: Kan
                         key={card.id}
                         className="mb-2 rounded-xl"
                         style={{
-                          background: "hsl(var(--surface-elevated))",
-                          border: "1px solid hsl(var(--border))",
+                          background: "var(--bg-elevated)",
+                          border: "1px solid var(--border-base)",
                         }}
                       >
                         <KanbanCardComponent card={card} />
@@ -280,16 +280,16 @@ export function KanbanBoard({ title, description, columns: initialColumns }: Kan
                         className="flex-1 text-xs px-2 py-1.5 rounded-lg bg-transparent outline-none"
                         style={{
                           background: "rgba(255,255,255,0.05)",
-                          border: "1px solid hsl(var(--border))",
-                          color: "hsl(var(--ink))",
+                          border: "1px solid var(--border-base)",
+                          color: "var(--text-primary)",
                         }}
                       />
                       <button
                         onClick={() => handleAddCard(col.id)}
                         className="px-2 py-1 rounded-lg text-xs font-medium"
                         style={{
-                          background: "hsl(var(--brand-subtle))",
-                          color: "hsl(var(--brand))",
+                          background: "var(--accent-subtle)",
+                          color: "var(--accent-1)",
                         }}
                       >
                         Add
@@ -299,7 +299,7 @@ export function KanbanBoard({ title, description, columns: initialColumns }: Kan
                     <button
                       onClick={() => setAddingTo(col.id)}
                       className="w-full flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs transition-all"
-                      style={{ color: "hsl(var(--ink-faint))" }}
+                      style={{ color: "var(--text-muted)" }}
                       onMouseEnter={(e) =>
                         ((e.currentTarget as HTMLButtonElement).style.background = "rgba(255,255,255,0.04)")
                       }
@@ -321,13 +321,13 @@ export function KanbanBoard({ title, description, columns: initialColumns }: Kan
               <div
                 className="rounded-xl p-3 shadow-lg"
                 style={{
-                  background: "hsl(var(--surface-elevated))",
-                  border: "1px solid hsl(var(--brand-dim))",
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--accent-1)",
                   width: "200px",
                   transform: "rotate(3deg)",
                 }}
               >
-                <p className="text-sm" style={{ color: "hsl(var(--ink))" }}>
+                <p className="text-sm" style={{ color: "var(--text-primary)" }}>
                   {activeCard.title}
                 </p>
               </div>

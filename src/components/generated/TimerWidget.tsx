@@ -80,19 +80,19 @@ export function TimerWidget({ title, duration, label, type }: TimerProps) {
     <div
       className="rounded-2xl overflow-hidden"
       style={{
-        background: "hsl(var(--surface-elevated))",
-        border: "1px solid hsl(var(--border))",
+        background: "var(--bg-elevated)",
+        border: "1px solid var(--border-base)",
         width: "280px",
       }}
     >
       {/* Header */}
       <div
         className="flex items-center justify-between px-5 py-4"
-        style={{ borderBottom: "1px solid hsl(var(--border))" }}
+        style={{ borderBottom: "1px solid var(--border-base)" }}
       >
         <h3
           className="text-base font-semibold"
-          style={{ fontFamily: "var(--font-display)", color: "hsl(var(--ink))" }}
+          style={{ fontFamily: "'Poppins', sans-serif", color: "var(--text-primary)" }}
         >
           {title ?? (isPomodoro ? "Pomodoro Timer" : isStopwatch ? "Stopwatch" : "Timer")}
         </h3>
@@ -138,7 +138,7 @@ export function TimerWidget({ title, duration, label, type }: TimerProps) {
             <span
               className="text-4xl font-bold"
               style={{
-                fontFamily: "var(--font-mono)",
+                fontFamily: "'Geist Mono', monospace",
                 color: phaseColor,
                 transition: "color 0.3s",
               }}
@@ -146,7 +146,7 @@ export function TimerWidget({ title, duration, label, type }: TimerProps) {
               {formatDuration(current)}
             </span>
             {label && (
-              <span className="text-xs mt-1" style={{ color: "hsl(var(--ink-faint))" }}>
+              <span className="text-xs mt-1" style={{ color: "var(--text-muted)" }}>
                 {label}
               </span>
             )}
@@ -160,8 +160,8 @@ export function TimerWidget({ title, duration, label, type }: TimerProps) {
             className="w-10 h-10 rounded-xl flex items-center justify-center transition-all hover:opacity-70"
             style={{
               background: "rgba(255,255,255,0.05)",
-              border: "1px solid hsl(var(--border))",
-              color: "hsl(var(--ink-muted))",
+              border: "1px solid var(--border-base)",
+              color: "var(--text-secondary)",
             }}
           >
             <RotateCcw className="w-4 h-4" />
@@ -188,7 +188,7 @@ export function TimerWidget({ title, duration, label, type }: TimerProps) {
       {isPomodoro && (
         <div
           className="flex items-center justify-center gap-2 px-5 py-3"
-          style={{ borderTop: "1px solid hsl(var(--border))" }}
+          style={{ borderTop: "1px solid var(--border-base)" }}
         >
           {Array.from({ length: 4 }).map((_, i) => (
             <div
@@ -200,7 +200,7 @@ export function TimerWidget({ title, duration, label, type }: TimerProps) {
               }}
             />
           ))}
-          <span className="text-xs ml-2" style={{ color: "hsl(var(--ink-faint))" }}>
+          <span className="text-xs ml-2" style={{ color: "var(--text-muted)" }}>
             {sessions} session{sessions !== 1 ? "s" : ""}
           </span>
         </div>
